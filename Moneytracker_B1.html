@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wise Wallets - Money Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            animation: fadeIn 1s ease-in-out;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        button {
+            background: #6c47ff;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: #5633ff;
+            transform: scale(1.05);
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        select:hover,
+        input:hover {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid gray;
+        }
+
+        th {
+            background: #333;
+            font-weight: bold;
+        }
+
+        tr {
+            transition: background 0.3s;
+        }
+
+        tr:hover {
+            background: #292929;
+        }
+
+        .emoji {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        canvas {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+        }
+
+        .month-navigator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .month-nav-button {
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 0 15px;
+        }
+
+        .month-nav-button:hover {
+            background: #6c47ff;
+            transform: scale(1.1);
+        }
+
+        .current-month {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 0 10px;
+            min-width: 120px;
+        }
+
+        .add-button {
+            background: linear-gradient(45deg, #6c47ff, #5633ff);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-button:hover {
+            background: linear-gradient(45deg, #5633ff, #472ad5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .title {
+            background: linear-gradient(to right, #6c47ff, #00bcd4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            padding: 0;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #ff6b81;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            color: #888;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        /* Responsive Styles */
+        @media screen and (max-width: 768px) {
+            .container {
+                width: 90%;
+                padding: 15px;
+            }
+
+            button {
+                padding: 10px;
+            }
+
+            select,
+            input {
+                padding: 10px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            canvas {
+                height: 300px;
+            }
+            
+            .logo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+
+            button {
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            select,
+            input {
+                padding: 8px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            canvas {
+                height: 250px;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .month-nav-button {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+                margin: 0 10px;
+            }
+            
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .logo-text {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <svg class="logo" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                <path d="M214.1 105.8H85.9c-12.1 0-22 9.9-22 22v108.5c0 12.1 9.9 22 22 22h128.1c12.1 0 22-9.9 22-22V127.8c.1-12.1-9.8-22-21.9-22z" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M227.2 86.9H99.1c-12.1 0-22 9.9-22 22v10" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M107.9 127.8h77.9" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M107.9 168.4h127.6" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="618.3" cy="138.6" r="10.1" transform="translate(-487 -9.8)" fill="white"/>
+                <path d="M236.1 149.1h-32.4c-6.3 0-11.5 5.1-11.5 11.5v11.5c0 6.3 5.1 11.5 11.5 11.5h32.4c6.3 0 11.5-5.1 11.5-11.5v-11.5c0-6.3-5.2-11.5-11.5-11.5z" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="219.9" cy="166.2" r="6.9" fill="white"/>
+            </svg>
+            <span class="logo-text">WISE WALLETS</span>
+        </div>
+        <h1 class="title">Money Tracker</h1>
+        <label for="income">Total Budget/Income:</label>
+        <input type="number" id="income" placeholder="Enter your total income">
+        <div class="form">
+            <select id="transactionType">
+                <option value="debit">Debit (Expense)</option>
+                <option value="credit">Credit (Income)</option>
+            </select>
+            <select id="category">
+                <option value="College Fee">College Fee</option>
+                <option value="Rent">Rent</option>
+                <option value="Transport">Transport</option>
+                <option value="Food">Food</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Crypto Investments">Crypto Investments</option>
+                <option value="Stock Investments">Stock Investments</option>
+                <option value="Other">Other (Enter below)</option>
+            </select>
+            <input type="text" id="customCategory" placeholder="Enter custom category" style="display:none;">
+            <input type="number" id="amount" placeholder="Enter Amount">
+            <input type="date" id="date">
+            <button class="add-button" onclick="addTransaction()">Add Transaction</button>
+        </div>
+
+        <div class="month-navigator">
+            <button class="month-nav-button" id="prevMonth">&lt;</button>
+            <div class="current-month" id="currentMonth">March 2025</div>
+            <button class="month-nav-button" id="nextMonth">&gt;</button>
+        </div>
+
+        <h2>Expense: ₹<span id="totalExpense">0</span></h2>
+        <h2>Total Credit: ₹<span id="totalCredit">0</span></h2>
+        <h2>Total Debit: ₹<span id="totalDebit">0</span></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="transactionTable"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state">No transactions for this month</div>
+        <h2>Savings/Loss: ₹<span id="savings">0</span></h2>
+        <div class="emoji" id="emoji">😊</div>
+        <canvas id="profitLossChart"></canvas>
+    </div>
+
+    <script>
+        // Initialize transactions as an object with year-month keys
+        let transactions = {};
+        let currentDate = new Date();
+        let displayedMonth = currentDate.getMonth();
+        let displayedYear = currentDate.getFullYear();
+        
+        // Format a date as YYYY-MM
+        function getYearMonthKey(date) {
+            return `${date.getFullYear()}-${date.getMonth()}`;
+        }
+        
+        // Get current displayed month key
+        function getCurrentMonthKey() {
+            return `${displayedYear}-${displayedMonth}`;
+        }
+
+        // Update the displayed month text
+        function updateMonthDisplay() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", 
+                              "July", "August", "September", "October", "November", "December"];
+            document.getElementById("currentMonth").innerText = `${monthNames[displayedMonth]} ${displayedYear}`;
+        }
+
+        // Go to previous month
+        document.getElementById("prevMonth").addEventListener("click", function() {
+            displayedMonth--;
+            if (displayedMonth < 0) {
+                displayedMonth = 11;
+                displayedYear--;
+            }
+            updateMonthDisplay();
+            renderTransactions();
+            updateTotals();
+        });
+
+        // Go to next month
+        document.getElementById("nextMonth").addEventListener("click", function() {
+            displayedMonth++;
+            if (displayedMonth > 11) {
+                displayedMonth = 0;
+                displayedYear++;
+            }
+            updateMonthDisplay();
+            renderTransactions();
+            updateTotals();
+        });
+
+        // Initialize the month display
+        updateMonthDisplay();
+
+        document.getElementById("category").addEventListener("change", function () {
+            let customCategory = document.getElementById("customCategory");
+            customCategory.style.display = this.value === "Other" ? "block" : "none";
+        });
+
+        // Initialize the Chart with animation
+        let ctx = document.getElementById("profitLossChart").getContext("2d");
+        let profitLossChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: ["Total Income", "Total Credit", "Total Expense", "Savings"],
+                datasets: [{
+                    label: "Financial Overview (₹)",
+                    data: [0, 0, 0, 0], // Initial empty data
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 205, 86, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgb(75, 192, 192)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 99, 132)',
+                        'rgb(255, 205, 86)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    hoverBackgroundColor: [
+                        'rgba(75, 192, 192, 0.9)',
+                        'rgba(54, 162, 235, 0.9)',
+                        'rgba(255, 99, 132, 0.9)',
+                        'rgba(255, 205, 86, 0.9)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    datalabels: {
+                        color: 'white',
+                        font: {
+                            weight: 'bold'
+                        },
+                        formatter: function(value) {
+                            return '₹' + value;
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'white'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'white'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function to add transaction
+        function addTransaction() {
+            let type = document.getElementById("transactionType").value;
+            let category = document.getElementById("category").value;
+            if (category === "Other") {
+                category = document.getElementById("customCategory").value.trim();
+                if (!category) {
+                    alert("Please enter a custom category");
+                    return;
+                }
+            }
+            let amount = parseFloat(document.getElementById("amount").value);
+            let dateStr = document.getElementById("date").value;
+
+            if (!category || isNaN(amount) || !dateStr) {
+                alert("Please fill in all fields");
+                return;
+            }
+
+            let transactionDate = new Date(dateStr);
+            let yearMonthKey = getYearMonthKey(transactionDate);
+            
+            // Initialize the month if it doesn't exist
+            if (!transactions[yearMonthKey]) {
+                transactions[yearMonthKey] = [];
+            }
+            
+            // Add the transaction
+            transactions[yearMonthKey].push({
+                type: type,
+                category: category,
+                amount: amount,
+                date: dateStr
+            });
+            
+            // Clear the inputs
+            document.getElementById("amount").value = "";
+            if (category === "Other") {
+                document.getElementById("customCategory").value = "";
+            }
+            
+            // If the transaction is for the displayed month, update the view
+            renderTransactions();
+            updateTotals();
+
+            // Add a little animation to confirm the transaction was added
+            const container = document.querySelector('.container');
+            container.style.animation = 'none';
+            container.offsetHeight; // Trigger reflow
+            container.style.animation = 'fadeIn 0.5s ease-in-out';
+        }
+
+        // Function to delete transaction
+        function deleteTransaction(index) {
+            let currentMonthKey = getCurrentMonthKey();
+            if (transactions[currentMonthKey]) {
+                transactions[currentMonthKey].splice(index, 1);
+                renderTransactions();
+                updateTotals();
+            }
+        }
+
+        // Function to render transactions for the current displayed month
+        function renderTransactions() {
+            let table = document.getElementById("transactionTable");
+            let emptyState = document.getElementById("emptyState");
+            table.innerHTML = "";
+            
+            let currentMonthKey = getCurrentMonthKey();
+            let monthTransactions = transactions[currentMonthKey] || [];
+            
+            if (monthTransactions.length === 0) {
+                emptyState.style.display = "block";
+            } else {
+                emptyState.style.display = "none";
+                
+                monthTransactions.forEach((transaction, index) => {
+                    let row = table.insertRow();
+                    let dateObj = new Date(transaction.date);
+                    let formattedDate = dateObj.toLocaleDateString();
+                    
+                    row.innerHTML = `<td>${transaction.type}</td>
+                        <td>${transaction.category}</td>
+                        <td>₹${transaction.amount}</td>
+                        <td>${formattedDate}</td>
+                        <td><button class="delete-btn" onclick="deleteTransaction(${index})">×</button></td>`;
+                        
+                    // Add animation to the new row
+                    row.style.animation = 'fadeIn 0.5s ease-in-out';
+                });
+            }
+        }
+
+        // Function to update totals for the displayed month
+        function updateTotals() {
+            let totalIncome = parseFloat(document.getElementById("income").value) || 0;
+            let currentMonthKey = getCurrentMonthKey();
+            let monthTransactions = transactions[currentMonthKey] || [];
+            
+            let totalCredit = 0;
+            let totalDebit = 0;
+            
+            monthTransactions.forEach(transaction => {
+                if (transaction.type === "credit") {
+                    totalCredit += transaction.amount;
+                } else {
+                    totalDebit += transaction.amount;
+                }
+            });
+            
+            let savings = totalIncome + totalCredit - totalDebit;
+
+            document.getElementById("totalExpense").innerText = totalDebit.toFixed(2);
+            document.getElementById("totalCredit").innerText = totalCredit.toFixed(2);
+            document.getElementById("totalDebit").innerText = totalDebit.toFixed(2);
+            document.getElementById("savings").innerText = savings.toFixed(2);
+            document.getElementById("emoji").innerText = savings >= 0 ? "😊" : "😟";
+
+            // Update chart with animation
+            updateChart(totalIncome, totalCredit, totalDebit, savings);
+        }
+
+        // Function to update the Chart with animation
+        function updateChart(totalIncome, totalCredit, totalDebit, savings) {
+            profitLossChart.data.datasets[0].data = [
+                totalIncome, 
+                totalCredit, 
+                totalDebit, 
+                savings
+            ];
+            
+            profitLossChart.update();
+        }
+
+        // Initialize
+        document.getElementById("income").addEventListener("input", updateTotals);
+        
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("date").value = today;
+        
+        // Initial render
+        renderTransactions();
+        updateTotals();
+    </script>
+</body>
+
+</html>
